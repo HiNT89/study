@@ -6,34 +6,38 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Serialize } from '@/common/decorators/serialize.decorator';
+import { UserResponseDto } from './dto/user-response.dto';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
+import { ApiArrayResponse } from '@/common/decorators/api-array-response.decorator';
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
-    console.log('🚀 ~ UsersController ~ getProfile ~ req:', req);
     return { msg: 'Authenticated!' };
   }
 
+  // @UseInterceptors(ResponseInterceptor, PaginationInterceptor)
   @Get()
-  users() {
-    return this.usersService.getUsers();
+  @ApiArrayResponse(UserResponseDto)
+  @ApiPaginatedResponse(UserResponseDto)
+  @Serialize(UserResponseDto)
+  users(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNum = page ? +page : 1;
+    const limitNum = limit ? +limit : 10;
+    return this.usersService.findAll(pageNum, limitNum);
   }
-
-  // @Post('login')
-  // login(@Body() body: { email: string; password: string }) {
-  //   const { email, password } = body;
-  //   return this.usersService.login(email, password);
-  // }
 
   @Get(':id')
   getUser(@Param('id') id: string) {

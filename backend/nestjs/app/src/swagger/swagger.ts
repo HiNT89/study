@@ -1,17 +1,20 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import AppConfig from '../config';
+// import AppConfig from '../config';
+
+import configuration from '@/config/configuration';
 
 const initSwagger = (app: INestApplication) => {
+  const configApp = configuration();
   const config = new DocumentBuilder()
     .addBearerAuth()
-    .setTitle(AppConfig.TITLE)
-    .setDescription(AppConfig.DESCRIPTION)
-    .setVersion(AppConfig.VERSION)
+    .setTitle(configApp.swagger.title || '')
+    .setDescription(configApp.swagger.description || '')
+    .setVersion(configApp.swagger.version || '')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(AppConfig.SWAGGER_PATH, app, document, {
+  SwaggerModule.setup(configApp.swagger.path, app, document, {
     swaggerOptions: {
       tagsSorter: 'alpha',
       operationsSorter: 'alpha',
