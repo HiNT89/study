@@ -25,10 +25,10 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
+    console.log('🚀 ~ UsersController ~ getProfile ~ req:', req);
     return { msg: 'Authenticated!' };
   }
 
-  // @UseInterceptors(ResponseInterceptor, PaginationInterceptor)
   @Get()
   @ApiArrayResponse(UserResponseDto)
   @ApiPaginatedResponse(UserResponseDto)
