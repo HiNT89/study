@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user/user';
+import { User } from './entities/user';
 
 const mockUsers: User[] = [
   { id: 1, name: 'User 1' } as User,
