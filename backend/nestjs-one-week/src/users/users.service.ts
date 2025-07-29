@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -22,7 +23,6 @@ export class UsersService {
   async create(
     dto: CreateUserDto,
   ): Promise<User | { statusCode: number; message: string }> {
-    console.log('🚀 ~ UsersService ~ create ~ dto:', dto);
     // check if passwords match
     if (dto.password !== dto.confirmPassword) {
       return {
@@ -31,20 +31,19 @@ export class UsersService {
       };
     }
     // check if email already exists
-    const existingUser = await this.userRepo.findOne({
-      where: { email: dto.email },
-    });
+    const existingUser = await this.findByEmail(dto.email);
     if (existingUser) {
       return {
         statusCode: 400,
         message: 'Email already exists',
       };
     }
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
     // create and save the user
     const body = {
       name: dto.name,
       email: dto.email,
-      password: dto.password, // in a real app, hash the password before saving
+      password: hashedPassword, // in a real app, hash the password before saving
     };
     const user = this.userRepo.create(body);
     return this.userRepo.save(user);
@@ -66,5 +65,9 @@ export class UsersService {
     user.isActive = false;
     await this.userRepo.save(user);
     return user;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email, isActive: true } });
   }
 }

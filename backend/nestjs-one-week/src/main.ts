@@ -14,7 +14,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document); // Truy cập: http://localhost:3000/api/docs
+  SwaggerModule.setup('docs', app, document); // Truy cập: http://localhost:8080/docs
 
   app.useGlobalPipes(new ValidationPipe());
 
