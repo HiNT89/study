@@ -38,8 +38,8 @@ cd nest-blog-api
 ### 1. Cài các gói cần thiết
 
 ```bash
-npm install @nestjs/typeorm typeorm pg
-npm install class-validator class-transformer
+npm install @nestjs/typeorm typeorm pg class-validator class-transformer
+npm install swagger-ui @nestjs/swagger @nestjs/config pg
 ```
 
 ### 2. Cập nhật `app.module.ts`
@@ -47,21 +47,27 @@ npm install class-validator class-transformer
 ```ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'nest_blog',
-      autoLoadEntities: true,
-      synchronize: true, // Không dùng true khi production
+    ConfigModule.forRoot({
+      isGlobal: true, // Cho phép dùng ở mọi nơi
     }),
-    UsersModule,
+    TypeOrmModule.forRootAsync({
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: config.get('DB_HOST'),
+          port: +config.get('DB_PORT'),
+          username: config.get('DB_USERNAME'),
+          password: config.get('DB_PASSWORD'),
+          database: config.get('DB_NAME'),
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
+      inject: [ConfigService],
+    }),
   ],
 })
 export class AppModule {}
@@ -74,11 +80,11 @@ export class AppModule {}
 ### Tạo module + entity + DTO
 
 ```bash
-nest g module users
-nest g controller users
-nest g service users
-nest g class users/entities/user --no-spec
-nest g class users/dto/create-user.dto --no-spec
+nest g module type
+nest g controller type
+nest g service type
+nest g class type/entities/type --no-spec
+nest g class type/dto/create-type.dto --no-spec
 ```
 
 ---
